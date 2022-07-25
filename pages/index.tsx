@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect} from 'react'
 import styles from '../styles/Home.module.css'
 import axios from 'axios'
 import fileDownload from 'js-file-download'
@@ -16,7 +16,7 @@ interface ErrorMessageData {
 
 const config = {
   headers: { 'content-type': 'multipart/form-data' },
-  onUploadProgress: (event: any) => {
+  onUploadProgress: (event: React.FormEvent<HTMLInputElement>) => {
     console.log(`Current progress:`, Math.round((event.loaded * 100) / event.total));
   },
 };
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
 
   const [formInputData, setFormInputData] = useState<FormInputData>({image : null})
   const [errorMessage , setErrorMessage] = useState<ErrorMessageData>(initialState)
-  const [imgSrc, setImgSrc] = useState<string>("")
+  // const [imgSrc, setImgSrc] = useState<string>("")
 
   const onSubmit  = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -59,9 +59,9 @@ const Home: NextPage = () => {
       Please Upload an image:
       <div>
         <form onSubmit={onSubmit} >
-        <input type="file" onChange={(e) => setFormInputData({image : e.target.files ? e.target.files[0] : null})} />
+        <input type="file" id="file" onChange={(e) => setFormInputData({image : e.target.files ? e.target.files[0] : null})} />
         {errorMessage.state ? <span style={{color : 'red'}}>{errorMessage.message}</span> : null}
-        <button type="submit" disabled={formInputData.image ? false : true} >Submit</button>
+        <button type="submit" id="submit" disabled={formInputData.image ? false : true} >Submit</button>
         </form>
         {/* {imgSrc ? <img src={imgSrc} alt=""/> : null} */}
         </div>

@@ -1,14 +1,9 @@
 import nextConnect from "next-connect";
 import multer from "multer";
-import Jimp from 'jimp'
 
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Worker } from "worker_threads";
-
-
-//https://betterprogramming.pub/upload-files-to-next-js-with-api-routes-839ce9f28430
-//https://blog.logrocket.com/node-js-multithreading-worker-threads-why-they-matter/
 
 const oneMegabyteInBytes = 1000000;
 const outputFolderName = "./public/uploads"
@@ -32,7 +27,7 @@ const runService = (workerData) => {
 const upload = multer({
     limits: { fileSize: oneMegabyteInBytes * 10 },
     storage: multer.diskStorage({
-      destination: './public/uploads',
+      destination: outputFolderName,
       filename: (req, file, cb) => cb(null, file.originalname),
     }),
   });

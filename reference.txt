@@ -1,0 +1,9 @@
+NextJs Testing:
+https://nextjs.org/docs/testing
+
+Worker thread and Upload Files:
+https://betterprogramming.pub/upload-files-to-next-js-with-api-routes-839ce9f28430
+https://blog.logrocket.com/node-js-multithreading-worker-threads-why-they-matter/
+
+ESLint (and Prettier) Quickstart - Lint your javascipt code the right way:
+https://youtu.be/St1YSNoB36Y
