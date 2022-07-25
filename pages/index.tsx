@@ -41,7 +41,7 @@ const Home: NextPage = () => {
     const response = await axios.post("http://localhost:3000/api/to_jpeg", formData, config)
     console.log({response})
     console.log(response.data.message)
-    const buff = Buffer.from(response.data.message.data)
+    const buff = Buffer.from(Object.values(response.data.message))
     const blob = new Blob([buff], {type: "image/jpeg"})
     console.log(response.data.name.match(/(.*?).png/)[1])
     fileDownload(blob, `${response.data.name.match(/(.*?).png/)[1]}.jpg`)

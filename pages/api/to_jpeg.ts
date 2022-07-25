@@ -4,14 +4,30 @@ import Jimp from 'jimp'
 
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Worker } from "worker_threads";
 
 
 //https://betterprogramming.pub/upload-files-to-next-js-with-api-routes-839ce9f28430
-
+//https://blog.logrocket.com/node-js-multithreading-worker-threads-why-they-matter/
 
 const oneMegabyteInBytes = 1000000;
 const outputFolderName = "./public/uploads"
 
+
+// runService for worker_threads:
+const runService = (workerData) => {
+    console.log("This is the runService method: ", workerData)
+    return new Promise((resolve, reject) => {
+      const worker = new Worker('./scripts/imageProcess.ts', { workerData });
+      worker.on('message', resolve);
+      worker.on('error', reject);
+      worker.on('exit', (code) => {
+        if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+      })
+    })
+  }
+
+// ../../scripts/imageProcess.ts
 
 const upload = multer({
     limits: { fileSize: oneMegabyteInBytes * 10 },
@@ -34,16 +50,30 @@ const uploadMiddleware = upload.single("image")
 apiRoute.use(uploadMiddleware)
 
 apiRoute.post((req: NextApiRequest, res: NextApiResponse) => {
-    // console.log(req.file, typeof req.file)
-    Jimp.read(`./public/uploads/${req.file.originalname}`, (err, image) => {
-        console.log(image.bitmap.data, typeof image.bitmap.data)
-        if (err) res.status(500).json({message : "Something went wrong in backend"})
-        image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
-            if (err) res.status(500).json({message : "Something went wrong in backend"})
-            res.status(200).json({ message: buffer, name : req.file.originalname});
-        })
-    })
-});
+
+    async function distributeToWorker(req: NextApiRequest , res: NextApiResponse) {
+    try {
+        const {originalname} = req.file
+        const result = await runService(originalname)
+        console.log(result.message, typeof result.message)
+        res.status(200).json({message : result.message, name: result.name})
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({message : "Something went wrong in backend"})
+    }
+    // Jimp.read(`./public/uploads/${req.file.originalname}`, (err, image) => {
+    //     console.log(image.bitmap.data, typeof image.bitmap.data)
+    //     if (err) res.status(500).json({message : "Something went wrong in backend"})
+    //     image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+    //         if (err) res.status(500).json({message : "Something went wrong in backend"})
+    //         res.status(200).json({ message: buffer, name : req.file.originalname});
+    //     })
+    // })
+    }
+
+    distributeToWorker(req, res)
+})
+    // console.log(req.file, typeof req.files
 
 export const config = {
   api: {
